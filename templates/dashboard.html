@@ -3,154 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Dashboard</title>
+    <title>User Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        body { background-color: #212529; }
-        .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 280px; background-color: #343a40; padding: 1rem; }
+        body { background-color: #0d1117; color: #c9d1d9; }
+        .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 280px; background-color: #161b22; border-right: 1px solid #30363d; padding-top: 1rem; }
         .main-content { margin-left: 280px; padding: 2rem; }
-        .sidebar .nav-link { color: #adb5bd; font-size: 1.1rem; }
-        .sidebar .nav-link.active, .sidebar .nav-link:hover { color: #fff; background-color: #495057; }
-        .card { background-color: #343a40; }
+        .nav-link { color: #c9d1d9; }
+        .nav-link:hover { color: #58a6ff; }
+        .nav-link.active { color: #fff; font-weight: bold; }
+        .card { background-color: #161b22; border-color: #30363d; }
+        .form-control, .form-select { background-color: #0d1117; border-color: #30363d; color: #c9d1d9; }
+        .table { --bs-table-bg: #161b22; --bs-table-border-color: #30363d; --bs-table-striped-bg: #21262d; --bs-table-hover-bg: #21262d; }
     </style>
 </head>
 <body>
-    <div class="sidebar d-flex flex-column p-3">
-        <a href="{{ url_for('dashboard') }}" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-            <i class="bi bi-truck me-2 fs-4"></i>
-            <span class="fs-4">TMS Portal</span>
-        </a>
-        <hr>
-        <ul class="nav nav-pills flex-column mb-auto">
-            <li class="nav-item">
-                <a href="#" class="nav-link active" aria-current="page">
-                    <i class="bi bi-speedometer2 me-2"></i>Dashboard
-                </a>
-            </li>
-        </ul>
-        <hr>
-        <div class="dropdown">
-            <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-person-circle fs-4 me-2"></i>
-                <strong>{{ current_user.username }}</strong>
+
+<div class="sidebar d-flex flex-column p-3">
+    <h4 class="text-white mb-4">🚚 TMS Dashboard</h4>
+    <ul class="nav nav-pills flex-column mb-auto">
+        <li class="nav-item">
+            <a href="{{ url_for('dashboard') }}" class="nav-link active">
+                My Bookings
             </a>
-            <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
-                <li><a class="dropdown-item" href="{{ url_for('logout') }}">Sign out</a></li>
-            </ul>
+        </li>
+    </ul>
+    <hr>
+    <div class="dropdown">
+        <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            <strong>Welcome, {{ current_user.username }}</strong>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
+            <li><a class="dropdown-item" href="{{ url_for('logout') }}">Sign out</a></li>
+        </ul>
+    </div>
+</div>
+
+<main class="main-content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Book a New Trip</h5>
+        </div>
+        <div class="card-body">
+            <form action="{{ url_for('book_trip') }}" method="POST">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="origin" class="form-label">Origin</label>
+                        <input type="text" class="form-control" id="origin" name="origin" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="destination" class="form-label">Destination</label>
+                        <input type="text" class="form-control" id="destination" name="destination" required>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="start_date" class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="start_date" name="start_date" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="end_date" class="form-label">End Date</label>
+                        <input type="date" class="form-control" id="end_date" name="end_date" required>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="truck_id" class="form-label">Select Truck</label>
+                        <select class="form-select" id="truck_id" name="truck_id" required>
+                            <option selected disabled value="">Choose...</option>
+                            {% for truck in trucks %}
+                            <option value="{{ truck.TruckID }}">{{ truck.RegistrationNum }} ({{ truck.Model_Id }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="driver_id" class="form-label">Select Driver</label>
+                        <select class="form-select" id="driver_id" name="driver_id" required>
+                            <option selected disabled value="">Choose...</option>
+                            {% for driver in drivers %}
+                            <option value="{{ driver.DriverID }}">{{ driver.FirstName }} {{ driver.LastName }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Book Now</button>
+            </form>
         </div>
     </div>
 
-    <main class="main-content">
-        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-            <h1 class="h2">User Dashboard</h1>
+    <div class="card">
+        <div class="card-header">
+            <h5>My Bookings</h5>
         </div>
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-        <div class="row g-4">
-            <!-- Book a New Trip Section -->
-            <div class="col-md-5">
-                <div class="card h-100">
-                    <div class="card-header">
-                        <h4 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Book a New Trip</h4>
-                    </div>
-                    <div class="card-body">
-                        <form method="POST" action="{{ url_for('book_trip') }}">
-                            <div class="mb-3">
-                                <label for="origin" class="form-label">Origin</label>
-                                <input type="text" class="form-control" id="origin" name="origin" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="destination" class="form-label">Destination</label>
-                                <input type="text" class="form-control" id="destination" name="destination" required>
-                            </div>
-                             <div class="mb-3">
-                                <label for="start_date" class="form-label">Start Date</label>
-                                <input type="date" class="form-control" id="start_date" name="start_date" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="truck_id" class="form-label">Select Truck</label>
-                                <select class="form-select" id="truck_id" name="truck_id" required>
-                                    <option value="" disabled selected>Choose a truck...</option>
-                                    {% for truck in trucks %}
-                                        <option value="{{ truck.TruckID }}">{{ truck.RegistrationNum }} ({{ truck.Model_Id }})</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="driver_id" class="form-label">Select Driver</label>
-                                <select class="form-select" id="driver_id" name="driver_id" required>
-                                    <option value="" disabled selected>Choose a driver...</option>
-                                    {% for driver in drivers %}
-                                        <option value="{{ driver.DriverID }}">{{ driver.FirstName }} {{ driver.LastName }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100">Book Now</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <!-- My Bookings Section -->
-            <div class="col-md-7">
-                <div class="card h-100">
-                     <div class="card-header">
-                        <h4 class="mb-0"><i class="bi bi-list-task me-2"></i>My Bookings</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Trip ID</th>
-                                        <th>Origin</th>
-                                        <th>Destination</th>
-                                        <th>Date</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for booking in bookings %}
-                                    <tr>
-                                        <td>{{ booking.TripID }}</td>
-                                        <td>{{ booking.Origin }}</td>
-                                        <td>{{ booking.Destination }}</td>
-                                        <td>{{ booking.StartDate }}</td>
-                                        <td>
-                                            <span class="badge 
-                                                {% if booking.Status == 'Completed' %} bg-success
-                                                {% elif booking.Status == 'Scheduled' %} bg-info
-                                                {% else %} bg-warning
-                                                {% endif %}">
-                                                {{ booking.Status }}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    {% else %}
-                                    <tr>
-                                        <td colspan="5" class="text-center">You have no bookings yet.</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Trip ID</th>
+                            <th>Origin</th>
+                            <th>Destination</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in bookings %}
+                        <tr>
+                            <td>{{ booking.TripID }}</td>
+                            <td>{{ booking.Origin }}</td>
+                            <td>{{ booking.Destination }}</td>
+                            <td>{{ booking.StartDate }}</td>
+                            <td>{{ booking.EndDate }}</td>
+                            <td><span class="badge bg-info text-dark">{{ booking.Status }}</span></td>
+                            <td>
+                                {% if booking.Status == 'Scheduled' %}
+                                <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#confirmCancelModal" data-trip-id="{{ booking.TripID }}">
+                                    Cancel
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center">You have no bookings yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
-    </main>
+    </div>
+</main>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmCancelModal" tabindex="-1" aria-labelledby="confirmCancelModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmCancelModalLabel">Confirm Cancellation</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to cancel this booking? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <form id="cancelForm" method="POST" action="">
+                    <button type="submit" class="btn btn-danger">Yes, Cancel Booking</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const confirmCancelModal = document.getElementById('confirmCancelModal');
+    if (confirmCancelModal) {
+        confirmCancelModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const tripId = button.getAttribute('data-trip-id');
+            const cancelForm = document.getElementById('cancelForm');
+            cancelForm.action = `/cancel_trip/${tripId}`;
+        });
+    }
+</script>
+
 </body>
 </html>
+
