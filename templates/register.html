@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Account</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0d1117; display: flex; align-items: center; justify-content: center; height: 100vh; }
+        .register-card { background-color: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 2.5rem; width: 100%; max-width: 500px; }
+        .form-control { background-color: #0d1117; border-color: #30363d; color: #c9d1d9; }
+        .form-control:focus { background-color: #0d1117; border-color: #58a6ff; box-shadow: 0 0 0 0.25rem rgba(88, 166, 255, 0.25); color: #c9d1d9; }
+        .btn-primary { background-color: #238636; border-color: #238636; }
+        .btn-primary:hover { background-color: #2ea043; border-color: #2ea043; }
+    </style>
+</head>
+<body>
+    <div class="register-card">
+        <div class="text-center mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-truck-front-fill" viewBox="0 0 16 16">
+                <path d="M11.534 3.428a.5.5 0 0 1 .43.262l1.558 3.287a.5.5 0 0 1-.218.638l-.495.248a.5.5 0 0 1-.62.054l-1.33-1.065a.5.5 0 0 1-.033-.62l1.16-1.742a.5.5 0 0 1 .448-.263zM13.294 13H15.5a.5.5 0 0 0 .5-.5V5.21a.5.5 0 0 0-.12-.32L12.38 1.55A1.5 1.5 0 0 0 11.152 1H4.848A1.5 1.5 0 0 0 3.62 1.55L.62 4.89a.5.5 0 0 0-.12.32V12.5a.5.5 0 0 0 .5.5H2.706a.58.58 0 0 0 .523-.323l.984-2.163a.5.5 0 0 1 .448-.263h6.674a.5.5 0 0 1 .448.263l.984 2.163a.58.58 0 0 0 .523.323zM3 13.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm9 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/>
+            </svg>
+            <h2 class="mt-2">Create an Account</h2>
+            <p class="text-muted">Join our truck management system today.</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('register') }}">
+            <h5>Account Details</h5>
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" name="username" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <hr>
+            <h5>Client Profile</h5>
+             <div class="mb-3">
+                <label for="client_name" class="form-label">Company or Full Name</label>
+                <input type="text" class="form-control" id="client_name" name="client_name" required>
+            </div>
+             <div class="mb-3">
+                <label for="billing_address" class="form-label">Billing Address</label>
+                <input type="text" class="form-control" id="billing_address" name="billing_address" required>
+            </div>
+            <div class="mb-3">
+                <label for="contact_person" class="form-label">Contact Person</label>
+                <input type="text" class="form-control" id="contact_person" name="contact_person" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 mt-2">Register</button>
+        </form>
+         <div class="text-center mt-3">
+            <small>Already have an account? <a href="{{ url_for('login') }}">Login here</a></small>
+        </div>
+    </div>
+</body>
+</html>
